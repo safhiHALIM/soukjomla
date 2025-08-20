@@ -35,8 +35,18 @@ const strictLimiter = rateLimit({
 });
 
 // Middleware
+// Trust proxy in production (needed for secure cookies behind load balancers)
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
+
 app.use(cors());
-// app.use(limiter); // Rate limiting désactivé pour le développement
+
+// Enable rate limiting only in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(limiter);
+}
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -54,6 +64,8 @@ app.use(session({
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
+// Also expose under /public for compatibility with absolute paths in static hosting
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // API Routes
 app.use('/api', storeRoutes);
@@ -124,14 +136,16 @@ app.post('/api/migrate-categories', async (req, res) => {
     }
 });
 
-// Apply strict rate limiting to sensitive endpoints (désactivé pour le développement)
-// app.use('/api/generate-link', strictLimiter);
-// app.use('/api/check-link', strictLimiter);
-// app.use('/api/admin/login', strictLimiter);
+// Apply strict rate limiting to sensitive endpoints only in production
+if (process.env.NODE_ENV === 'production') {
+    app.use('/api/generate-link', strictLimiter);
+    app.use('/api/check-link', strictLimiter);
+    app.use('/api/admin/login', strictLimiter);
+}
 
 // Serve admin page (protected route will be handled by frontend)
 app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+    res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
 // Serve setup guide
