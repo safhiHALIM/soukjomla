@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Liste des Commandes Livrées</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+    <h2 class="mb-4">🧪 Test de la Section des Commandes Livrées</h2>
+    
+    <div class="alert alert-info">
+        <strong>Nouvelles fonctionnalités ajoutées :</strong>
+        <ul class="mb-0">
+            <li>✅ <strong>Section "✅ Commandes Livrées"</strong> sous la liste principale</li>
+            <li>✅ <strong>Filtrage automatique</strong> des commandes avec status = 'delivered'</li>
+            <li>✅ <strong>Colonne Supprimer</strong> avec bouton de suppression</li>
+            <li>✅ <strong>Sécurité</strong> : Seules les commandes livrées peuvent être supprimées</li>
+            <li>✅ <strong>Confirmation</strong> avant suppression définitive</li>
+        </ul>
+    </div>
+
+    <!-- Simulation de la section commandes livrées -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">✅ Commandes Livrées</h5>
+                <div>
+                    <span class="badge bg-success">Livrées: <span id="deliveredCount">3</span></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table" id="deliveredOrdersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Date Livraison</th>
+                            <th>Actions</th>
+                            <th>Supprimer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Exemples de commandes livrées -->
+                        <tr>
+                            <td><strong>#12</strong></td>
+                            <td>
+                                <div>
+                                    <strong>Marie Dupont</strong>
+                                    <br><small class="text-muted">marie@email.com</small>
+                                </div>
+                            </td>
+                            <td>
+                                <strong class="text-success">$299.99</strong>
+                            </td>
+                            <td>
+                                <small>15/08/2025</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" title="Voir détails">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-info" title="Imprimer">
+                                        <i class="bi bi-printer"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger" onclick="testDelete(12)" title="Supprimer cette commande livrée">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#10</strong></td>
+                            <td>
+                                <div>
+                                    <strong>Jean Martin</strong>
+                                    <br><small class="text-muted">jean@email.com</small>
+                                </div>
+                            </td>
+                            <td>
+                                <strong class="text-success">$149.99</strong>
+                            </td>
+                            <td>
+                                <small>12/08/2025</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" title="Voir détails">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-info" title="Imprimer">
+                                        <i class="bi bi-printer"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger" onclick="testDelete(10)" title="Supprimer cette commande livrée">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#8</strong></td>
+                            <td>
+                                <div>
+                                    <strong>Sophie Bernard</strong>
+                                    <br><small class="text-muted">sophie@email.com</small>
+                                </div>
+                            </td>
+                            <td>
+                                <strong class="text-success">$89.99</strong>
+                            </td>
+                            <td>
+                                <small>10/08/2025</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" title="Voir détails">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-info" title="Imprimer">
+                                        <i class="bi bi-printer"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger" onclick="testDelete(8)" title="Supprimer cette commande livrée">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-warning mt-4">
+        <h6><strong>⚠️ Sécurité importante :</strong></h6>
+        <ul class="mb-0">
+            <li>🔒 <strong>Protection</strong> : Seules les commandes avec status="delivered" peuvent être supprimées</li>
+            <li>🚫 <strong>Blocage</strong> : Impossible de supprimer les commandes pending/processing/shipped</li>
+            <li>💬 <strong>Confirmation</strong> : Demande de confirmation avant suppression</li>
+            <li>🔄 <strong>Actualisation</strong> : Les deux listes se mettent à jour après suppression</li>
+        </ul>
+    </div>
+
+    <div class="alert alert-success mt-4">
+        <h6><strong>✅ Fonctionnement :</strong></h6>
+        <ol class="mb-0">
+            <li><strong>Chargement</strong> : La section se charge automatiquement avec les commandes livrées</li>
+            <li><strong>Affichage</strong> : Tableau avec colonnes Order ID, Customer, Total, Date, Actions, Supprimer</li>
+            <li><strong>Suppression</strong> : Clic sur le bouton poubelle → Confirmation → Suppression définitive</li>
+            <li><strong>Actualisation</strong> : Les deux tableaux se rechargent après suppression</li>
+        </ol>
+    </div>
+
+    <script>
+        function testDelete(orderId) {
+            if (confirm('⚠️ ATTENTION !\n\nÊtes-vous sûr de vouloir supprimer définitivement cette commande livrée ?\n\nCette action est irréversible et supprimera :\n- La commande et tous ses détails\n- L\'historique de la commande\n- Les éléments associés\n\nConfirmer la suppression ?')) {
+                alert(`✅ Test de suppression pour la commande #${orderId}\n\nDans l'interface réelle, cette commande serait supprimée de la base de données.`);
+                
+                // Simuler la suppression visuelle
+                const row = event.target.closest('tr');
+                row.style.transition = 'opacity 0.5s ease-out';
+                row.style.opacity = '0.3';
+                
+                setTimeout(() => {
+                    row.remove();
+                    // Mettre à jour le compteur
+                    const countElement = document.getElementById('deliveredCount');
+                    countElement.textContent = parseInt(countElement.textContent) - 1;
+                }, 500);
+            }
+        }
+    </script>
+
+    <div class="text-center mt-4">
+        <a href="/admin.html" class="btn btn-primary">
+            🚀 Tester dans le Panel Admin
+        </a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Séparation des Commandes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Combobox de statut stylé */
+        .order-status-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            border: 2px solid transparent;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: 20px;
+            padding: 0.5rem 2.5rem 0.5rem 1rem;
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 16px 16px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 140px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6l3.5 3.5L11.5 6' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        }
+        
+        .order-status-select:hover { 
+            transform: translateY(-1px); 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); 
+        }
+
+        .order-status-select.status-pending { 
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        }
+        .order-status-select.status-processing { 
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+        }
+        .order-status-select.status-shipped { 
+            background: linear-gradient(135deg, #3f51b5 0%, #303f9f 100%);
+        }
+        .order-status-select.status-delivered { 
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        }
+        .order-status-select.status-cancelled { 
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        }
+
+        .highlight-moved {
+            animation: highlightMove 2s ease-in-out;
+        }
+
+        @keyframes highlightMove {
+            0% { background-color: rgba(255, 193, 7, 0.3); }
+            50% { background-color: rgba(40, 167, 69, 0.3); }
+            100% { background-color: transparent; }
+        }
+    </style>
+</head>
+<body class="container mt-5">
+    <h2 class="mb-4">🧪 Test de Séparation des Commandes</h2>
+    
+    <div class="alert alert-success">
+        <h5><strong>✅ Comportement Implémenté :</strong></h5>
+        <ul class="mb-0">
+            <li><strong>Liste principale</strong> : Affiche SEULEMENT les commandes NON-livrées (pending, processing, shipped, cancelled)</li>
+            <li><strong>Section livrées</strong> : Affiche SEULEMENT les commandes avec status="delivered"</li>
+            <li><strong>Séparation automatique</strong> : Quand une commande passe en "delivered", elle disparaît de la liste principale et apparaît dans la section livrées</li>
+        </ul>
+    </div>
+
+    <!-- 📋 Liste des Commandes (Non-livrées seulement) -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">📋 Liste des Commandes</h5>
+                <div>
+                    <span class="badge bg-light text-dark">Total: <span id="mainCount">3</span></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table" id="mainOrdersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Commandes NON-livrées uniquement -->
+                        <tr>
+                            <td>#16</td>
+                            <td>ilvl</td>
+                            <td>$449.99</td>
+                            <td>
+                                <select class="order-status-select status-pending" onchange="handleStatusChange(16, this)">
+                                    <option value="pending" selected>⏳ En attente</option>
+                                    <option value="processing">🔄 Traitement</option>
+                                    <option value="shipped">🚚 Expédiée</option>
+                                    <option value="delivered">✅ Livrée</option>
+                                    <option value="cancelled">❌ Annulée</option>
+                                </select>
+                            </td>
+                            <td>19/08/2025</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info me-1" title="Voir détails">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" title="Imprimer">
+                                    <i class="bi bi-printer"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>#9</td>
+                            <td>gbmh</td>
+                            <td>$1524.99</td>
+                            <td>
+                                <select class="order-status-select status-shipped" onchange="handleStatusChange(9, this)">
+                                    <option value="pending">⏳ En attente</option>
+                                    <option value="processing">🔄 Traitement</option>
+                                    <option value="shipped" selected>🚚 Expédiée</option>
+                                    <option value="delivered">✅ Livrée</option>
+                                    <option value="cancelled">❌ Annulée</option>
+                                </select>
+                            </td>
+                            <td>17/08/2025</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info me-1" title="Voir détails">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" title="Imprimer">
+                                    <i class="bi bi-printer"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>#8</td>
+                            <td>gbmh</td>
+                            <td>$749.98</td>
+                            <td>
+                                <select class="order-status-select status-shipped" onchange="handleStatusChange(8, this)">
+                                    <option value="pending">⏳ En attente</option>
+                                    <option value="processing">🔄 Traitement</option>
+                                    <option value="shipped" selected>🚚 Expédiée</option>
+                                    <option value="delivered">✅ Livrée</option>
+                                    <option value="cancelled">❌ Annulée</option>
+                                </select>
+                            </td>
+                            <td>16/08/2025</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info me-1" title="Voir détails">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" title="Imprimer">
+                                    <i class="bi bi-printer"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ Commandes Livrées (Delivered seulement) -->
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">✅ Commandes Livrées</h5>
+                <div>
+                    <span class="badge bg-light text-dark">Livrées: <span id="deliveredCount">5</span></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table" id="deliveredOrdersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Date Livraison</th>
+                            <th>Actions</th>
+                            <th>Supprimer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Commandes LIVRÉES uniquement -->
+                        <tr>
+                            <td><strong>#17</strong></td>
+                            <td>
+                                <div>
+                                    <strong>srht</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <strong class="text-success">$5219.63</strong>
+                            </td>
+                            <td>
+                                <small>19/08/2025</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" title="Voir détails">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-info" title="Imprimer">
+                                        <i class="bi bi-printer"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger" onclick="testDelete(17)" title="Supprimer cette commande livrée">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#15</strong></td>
+                            <td>
+                                <div>
+                                    <strong>neworld w3-new</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <strong class="text-success">$1950.96</strong>
+                            </td>
+                            <td>
+                                <small>18/08/2025</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" title="Voir détails">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-info" title="Imprimer">
+                                        <i class="bi bi-printer"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger" onclick="testDelete(15)" title="Supprimer cette commande livrée">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#14</strong></td>
+                            <td>
+                                <div>
+                                    <strong>neworld w3-new</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <strong class="text-success">$1950.96</strong>
+                            </td>
+                            <td>
+                                <small>18/08/2025</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" title="Voir détails">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-info" title="Imprimer">
+                                        <i class="bi bi-printer"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger" onclick="testDelete(14)" title="Supprimer cette commande livrée">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#13</strong></td>
+                            <td>
+                                <div>
+                                    <strong>neworld w3-new</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <strong class="text-success">$1950.96</strong>
+                            </td>
+                            <td>
+                                <small>18/08/2025</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" title="Voir détails">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-info" title="Imprimer">
+                                        <i class="bi bi-printer"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger" onclick="testDelete(13)" title="Supprimer cette commande livrée">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#12</strong></td>
+                            <td>
+                                <div>
+                                    <strong>neworld w3-new</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <strong class="text-success">$1950.96</strong>
+                            </td>
+                            <td>
+                                <small>18/08/2025</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" title="Voir détails">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-info" title="Imprimer">
+                                        <i class="bi bi-printer"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger" onclick="testDelete(12)" title="Supprimer cette commande livrée">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-info mt-4">
+        <h6><strong>🎯 Test à Effectuer :</strong></h6>
+        <ol>
+            <li><strong>Changement de statut</strong> : Changez le statut d'une commande en "✅ Livrée"</li>
+            <li><strong>Disparition</strong> : La commande disparaît de la liste principale</li>
+            <li><strong>Apparition</strong> : La commande apparaît dans la section "✅ Commandes Livrées"</li>
+            <li><strong>Suppression</strong> : Cliquez sur 🗑️ pour supprimer une commande livrée</li>
+        </ol>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="/admin.html" class="btn btn-primary btn-lg">
+            🚀 Tester dans le Panel Admin Réel
+        </a>
+    </div>
+
+    <script>
+        function handleStatusChange(orderId, selectElement) {
+            const newStatus = selectElement.value;
+            
+            // Mettre à jour la classe CSS
+            selectElement.className = 'order-status-select status-' + newStatus;
+            
+            if (newStatus === 'delivered') {
+                // Simuler le déplacement vers la section livrées
+                alert(`✅ Simulation réussie !\n\nLa commande #${orderId} a été changée en "Livrée".\n\nDans l'interface réelle :\n- Elle disparaîtrait de cette liste\n- Elle apparaîtrait dans la section "✅ Commandes Livrées"`);
+                
+                // Animation visuelle
+                const row = selectElement.closest('tr');
+                row.classList.add('highlight-moved');
+                
+                setTimeout(() => {
+                    row.style.transition = 'opacity 1s ease-out';
+                    row.style.opacity = '0.3';
+                }, 2000);
+            }
+        }
+
+        function testDelete(orderId) {
+            if (confirm('⚠️ ATTENTION !\n\nÊtes-vous sûr de vouloir supprimer définitivement cette commande livrée ?\n\nCette action est irréversible.')) {
+                alert(`✅ Suppression simulée de la commande #${orderId}\n\nDans l'interface réelle, la commande serait supprimée définitivement de la base de données.`);
+                
+                // Animation de suppression
+                const row = event.target.closest('tr');
+                row.style.transition = 'opacity 0.5s ease-out';
+                row.style.opacity = '0.3';
+                
+                setTimeout(() => {
+                    row.remove();
+                    // Mettre à jour le compteur
+                    const countElement = document.getElementById('deliveredCount');
+                    countElement.textContent = parseInt(countElement.textContent) - 1;
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>

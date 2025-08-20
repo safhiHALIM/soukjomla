@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Gestion des Catégories</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-10 mx-auto">
+                <h2 class="text-center mb-4">🏷️ Test - Gestion des Catégories</h2>
+                
+                <!-- Étape 1: Migration -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-database-gear"></i> Étape 1: Migration de la Base de Données</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Ajout de la colonne <code>icon</code> à la table <code>categories</code> et création des catégories électroniques.</p>
+                        
+                        <button id="migrateBtn" class="btn btn-success" onclick="runMigration()">
+                            <i class="bi bi-play-circle"></i> Exécuter la Migration
+                        </button>
+                        
+                        <div id="migrationResult" class="mt-3"></div>
+                    </div>
+                </div>
+                
+                <!-- Étape 2: Test API -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-cloud-arrow-up"></i> Étape 2: Test des API</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-outline-primary w-100" onclick="testGetCategories()">
+                                    <i class="bi bi-list"></i> GET Categories
+                                </button>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-outline-success w-100" onclick="testCreateCategory()">
+                                    <i class="bi bi-plus"></i> POST Category
+                                </button>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-outline-warning w-100" onclick="testUpdateCategory()">
+                                    <i class="bi bi-pencil"></i> PUT Category
+                                </button>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <button class="btn btn-outline-danger w-100" onclick="testDeleteCategory()">
+                                    <i class="bi bi-trash"></i> DELETE Category
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="apiResult" class="mt-3"></div>
+                    </div>
+                </div>
+                
+                <!-- Étape 3: Interface Admin -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-gear"></i> Étape 3: Interface Admin</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Testez l'interface admin pour gérer les catégories :</p>
+                        
+                        <a href="/admin" class="btn btn-success" target="_blank">
+                            <i class="bi bi-box-arrow-up-right"></i> Ouvrir l'Admin Panel
+                        </a>
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <strong>Identifiants :</strong> admin / admin123<br>
+                                <strong>Navigation :</strong> Cliquez sur "Categories" dans le menu de gauche
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Résultats -->
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal"></i> Logs et Résultats</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="logs" style="height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.9rem; background: #f8f9fa; padding: 1rem; border-radius: 5px;">
+                            <div class="text-muted">Prêt pour les tests...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let testCategoryId = null;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logs = document.getElementById('logs');
+            const colorClass = type === 'error' ? 'text-danger' : type === 'success' ? 'text-success' : type === 'warning' ? 'text-warning' : 'text-info';
+            
+            logs.innerHTML += `<div class="${colorClass}">[${timestamp}] ${message}</div>`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+        
+        async function runMigration() {
+            const btn = document.getElementById('migrateBtn');
+            const result = document.getElementById('migrationResult');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Migration en cours...';
+            log('🔄 Démarrage de la migration...', 'info');
+            
+            try {
+                const response = await fetch('/api/migrate-categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = `<div class="alert alert-success"><i class="bi bi-check-circle"></i> ${data.message}</div>`;
+                    log('✅ Migration réussie !', 'success');
+                    log(`📊 ${data.categories.length} catégories créées`, 'success');
+                } else {
+                    result.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> ${data.message}</div>`;
+                    log('❌ Erreur de migration: ' + data.message, 'error');
+                }
+                
+            } catch (error) {
+                result.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Erreur: ${error.message}</div>`;
+                log('❌ Erreur réseau: ' + error.message, 'error');
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> Migration Terminée';
+        }
+        
+        async function testGetCategories() {
+            log('🔍 Test GET /api/categories', 'info');
+            
+            try {
+                const response = await fetch('/api/categories');
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ GET réussi: ${data.categories.length} catégories trouvées`, 'success');
+                    displayApiResult('GET Categories', data.categories);
+                } else {
+                    log('❌ GET échoué: ' + data.message, 'error');
+                }
+            } catch (error) {
+                log('❌ Erreur GET: ' + error.message, 'error');
+            }
+        }
+        
+        async function testCreateCategory() {
+            log('➕ Test POST /api/admin/categories', 'info');
+            
+            const categoryData = {
+                name: 'Test Category ' + Date.now(),
+                description: 'Catégorie de test créée automatiquement',
+                icon: 'bi-star'
+            };
+            
+            try {
+                const response = await fetch('/api/admin/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(categoryData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    testCategoryId = data.category.id;
+                    log(`✅ POST réussi: Catégorie créée avec ID ${testCategoryId}`, 'success');
+                    displayApiResult('POST Category', data.category);
+                } else {
+                    log('❌ POST échoué: ' + data.message, 'error');
+                }
+            } catch (error) {
+                log('❌ Erreur POST: ' + error.message, 'error');
+            }
+        }
+        
+        async function testUpdateCategory() {
+            if (!testCategoryId) {
+                log('⚠️ Créez d\'abord une catégorie avec POST', 'warning');
+                return;
+            }
+            
+            log(`✏️ Test PUT /api/admin/categories/${testCategoryId}`, 'info');
+            
+            const updateData = {
+                name: 'Test Category Updated',
+                description: 'Catégorie modifiée par le test',
+                icon: 'bi-heart'
+            };
+            
+            try {
+                const response = await fetch(`/api/admin/categories/${testCategoryId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('✅ PUT réussi: Catégorie modifiée', 'success');
+                    displayApiResult('PUT Category', data.category);
+                } else {
+                    log('❌ PUT échoué: ' + data.message, 'error');
+                }
+            } catch (error) {
+                log('❌ Erreur PUT: ' + error.message, 'error');
+            }
+        }
+        
+        async function testDeleteCategory() {
+            if (!testCategoryId) {
+                log('⚠️ Créez d\'abord une catégorie avec POST', 'warning');
+                return;
+            }
+            
+            log(`🗑️ Test DELETE /api/admin/categories/${testCategoryId}`, 'info');
+            
+            try {
+                const response = await fetch(`/api/admin/categories/${testCategoryId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('✅ DELETE réussi: Catégorie supprimée', 'success');
+                    testCategoryId = null;
+                    displayApiResult('DELETE Category', { message: data.message });
+                } else {
+                    log('❌ DELETE échoué: ' + data.message, 'error');
+                }
+            } catch (error) {
+                log('❌ Erreur DELETE: ' + error.message, 'error');
+            }
+        }
+        
+        function displayApiResult(title, data) {
+            const result = document.getElementById('apiResult');
+            result.innerHTML = `
+                <div class="alert alert-info">
+                    <h6>${title}</h6>
+                    <pre class="mb-0" style="font-size: 0.8rem;">${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+        }
+        
+        // Test automatique au chargement
+        window.addEventListener('load', function() {
+            log('🚀 Page de test chargée', 'success');
+            log('📋 Étapes à suivre:', 'info');
+            log('1. Exécuter la migration', 'info');
+            log('2. Tester les API', 'info');
+            log('3. Ouvrir l\'admin panel', 'info');
+        });
+    </script>
+</body>
+</html>

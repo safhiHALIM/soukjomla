@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Suggestions de Recherche</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <h2 class="text-center mb-4">🔍 Test des Suggestions de Recherche</h2>
+                
+                <!-- Barre de recherche de test -->
+                <div class="search-container mb-4">
+                    <div class="search-wrapper">
+                        <input type="text" 
+                               class="form-control search-input" 
+                               id="searchInput" 
+                               placeholder="Tapez pour voir les suggestions..." 
+                               autocomplete="off">
+                        <button class="search-btn" type="button" onclick="performSearch()">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <div class="search-suggestions" id="searchSuggestions"></div>
+                    </div>
+                </div>
+                
+                <!-- Tests prédéfinis -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5>Tests Rapides :</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="testSearch('phone')">phone</button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="testSearch('laptop')">laptop</button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="testSearch('samsung')">samsung</button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="testSearch('apple')">apple</button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="testSearch('headphones')">headphones</button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="testSearch('camera')">camera</button>
+                            <button class="btn btn-outline-danger btn-sm" onclick="testSearch('xyz123')">Aucun résultat</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Informations de debug -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">État des Fonctions</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="functionsStatus"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Logs en Temps Réel</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="realTimeLogs" style="height: 200px; overflow-y: auto; font-size: 0.8rem; font-family: monospace;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Instructions -->
+                <div class="alert alert-info mt-4">
+                    <h6><i class="bi bi-info-circle"></i> Instructions :</h6>
+                    <ul class="mb-0">
+                        <li><strong>Tapez dans la barre</strong> : Les suggestions apparaissent après 2 caractères</li>
+                        <li><strong>Utilisez les boutons</strong> : Tests rapides avec différents termes</li>
+                        <li><strong>Navigation clavier</strong> : Flèches haut/bas, Enter pour sélectionner</li>
+                        <li><strong>Cliquez sur un produit</strong> : Ouvre la page du produit</li>
+                        <li><strong>Cliquez "Voir tous"</strong> : Lance la recherche complète</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        let logCount = 0;
+        
+        function log(message, type = 'info') {
+            logCount++;
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('realTimeLogs');
+            const colorClass = type === 'error' ? 'text-danger' : type === 'success' ? 'text-success' : 'text-info';
+            
+            logDiv.innerHTML += `<div class="${colorClass}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            // Limiter à 50 logs
+            if (logCount > 50) {
+                const lines = logDiv.innerHTML.split('<div');
+                logDiv.innerHTML = '<div' + lines.slice(-49).join('<div');
+                logCount = 50;
+            }
+        }
+        
+        function testSearch(query) {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = query;
+            searchInput.focus();
+            
+            // Déclencher l'événement input
+            const event = new Event('input', { bubbles: true });
+            searchInput.dispatchEvent(event);
+            
+            log(`Test lancé pour: "${query}"`, 'info');
+        }
+        
+        function checkFunctions() {
+            const functions = [
+                'performSearch',
+                'searchProducts', 
+                'displaySuggestions',
+                'initializeSearch',
+                'showSuggestions',
+                'hideSuggestions'
+            ];
+            
+            const statusDiv = document.getElementById('functionsStatus');
+            let html = '';
+            
+            functions.forEach(funcName => {
+                const exists = typeof window[funcName] === 'function';
+                const icon = exists ? '✅' : '❌';
+                const color = exists ? 'text-success' : 'text-danger';
+                html += `<div class="${color}">${icon} ${funcName}</div>`;
+            });
+            
+            statusDiv.innerHTML = html;
+        }
+        
+        // Override console.log pour capturer les logs
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            log(args.join(' '));
+        };
+        
+        const originalError = console.error;
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            log(args.join(' '), 'error');
+        };
+        
+        // Initialisation
+        window.addEventListener('load', function() {
+            log('Page de test chargée', 'success');
+            checkFunctions();
+            
+            // Test automatique après 2 secondes
+            setTimeout(() => {
+                log('Lancement du test automatique...', 'info');
+                testSearch('phone');
+            }, 2000);
+        });
+        
+        // Vérifier périodiquement l'état
+        setInterval(checkFunctions, 5000);
+    </script>
+</body>
+</html>
