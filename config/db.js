@@ -8,6 +8,8 @@ const pool = mysql.createPool({
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'neosafi_store',
     port: process.env.DB_PORT || 3306,
+    // Enable SSL for managed MySQL providers (e.g., PlanetScale) when DB_SSL=true
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: true } : undefined,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
